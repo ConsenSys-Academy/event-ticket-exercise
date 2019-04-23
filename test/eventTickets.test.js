@@ -32,7 +32,6 @@ contract('EventTicket', function(accounts) {
             
             assert.equal(eventDetails.isOpen, true, "the event should be open")
         })
-
     })
 
     describe("Functions", () => {

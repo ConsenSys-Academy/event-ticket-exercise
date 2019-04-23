@@ -10,11 +10,14 @@ contract EventTickets {
         uint tickets;
         uint sales;
         mapping(address => uint) buyers;
-        bool openSales;
+        bool isOpen;
     }
      
     Event myEvent;
 
+    event LogBuyTickets(address buyer, uint numTickets);
+    event LogGetRefund(address accountRefunded, uint numTickets);
+    event LogEndSale(address owner, uint balance);
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -25,11 +28,11 @@ contract EventTickets {
         myEvent.description = _desc;
         myEvent.website = _web;
         myEvent.tickets = _tickets;
-        myEvent.openSales = true;
+        myEvent.isOpen = true;
     }
      
     function readEvent() view public returns(string memory description, string memory website, uint tickets, uint sales, bool isOpen) {
-        return (myEvent.description, myEvent.website, myEvent.tickets, myEvent.sales, myEvent.openSales);
+        return (myEvent.description, myEvent.website, myEvent.tickets, myEvent.sales, myEvent.isOpen);
     }
 
     function getBuyerTicketCount(address buyer) view public returns(uint count){
@@ -37,7 +40,7 @@ contract EventTickets {
     }
      
     function buyTickets(uint _numTickets) public payable {
-        require(myEvent.openSales == true);
+        require(myEvent.isOpen == true);
         require(msg.value >= _numTickets * PRICE_TICKET);
         require(myEvent.tickets - myEvent.sales >= _numTickets);
         myEvent.buyers[msg.sender] += _numTickets;
@@ -46,6 +49,7 @@ contract EventTickets {
         if (paymentChange > 0) {
             address(msg.sender).transfer(paymentChange);
         }
+        emit LogBuyTickets(msg.sender, _numTickets);
     }
      
     function getRefund() public {
@@ -54,10 +58,13 @@ contract EventTickets {
         myEvent.sales -= refundTickets;
         delete myEvent.buyers[msg.sender];
         address(msg.sender).transfer(refundTickets * PRICE_TICKET);
+        emit LogGetRefund(msg.sender, refundTickets);
     }
      
     function endSale() onlyOwner public {
-        myEvent.openSales = false;
+        myEvent.isOpen = false;
+        uint balance = address(this).balance;
         owner.transfer(address(this).balance);
+        emit LogEndSale(owner, balance);
     }
 }
