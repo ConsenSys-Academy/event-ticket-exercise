@@ -41,7 +41,7 @@ contract('EventTicket', function(accounts) {
     
             assert.equal(event.description, description, "the event descriptions should match")
             assert.equal(event.website, url, "the event urls should match")
-            assert.equal(event.tickets, ticketNumber, "the number of tickets for sale should be set")
+            assert.equal(event.totalTickets, ticketNumber, "the number of tickets for sale should be set")
             assert.equal(event.sales, 0, "the ticket sales should be 0")
         })
 
@@ -128,7 +128,7 @@ contract('EventTicket', function(accounts) {
                 await instance.buyTickets(numberOfTickets, {from: secondAccount, value: numberOfTickets * ticketPrice})
                 await instance.endSale({from: firstAccount})
                 const postSaleAmount = await web3.eth.getBalance(firstAccount)
-        
+                
                 assert.equal(postSaleAmount.slice(-4), (Number(preSaleAmount.slice(-4)) + numberOfTickets * ticketPrice).toString().slice(-4), "contract owner should receive contract balance when closing the event")
             })
         })

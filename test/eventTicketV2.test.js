@@ -114,27 +114,62 @@ contract('EventTicketV2', function(accounts) {
 
         describe("getRefund()", async() =>{
             it("only accounts that have purchased tickets should be able to get a refund", async() => {
+                const numTickets = 1
+                
+                await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, {from: deployAccount} )
+                await instance.buyTickets(0, numTickets, {from: firstAccount, value: ticketPrice * numTickets}) 
 
+                await catchRevert(instance.getRefund(0, {from: secondAccount}))
+                const tx = await instance.getRefund(0, {from: firstAccount})
+                const eventData = tx.logs[0]
+
+                assert.equal(eventData.event, "LogGetRefund", "the event should be called LogGetRefund")
+                assert.equal(eventData.args.accountRefunded, firstAccount, "the firstAccount should be the 'accountRefunded'")
             })
 
             it("account requesting a refund should be credited the appropriate amount", async() => {
-
+                const preSaleAmount = await web3.eth.getBalance(secondAccount)
+                await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, {from: deployAccount} )
+                await instance.buyTickets(0, 1, {from: secondAccount, value: ticketPrice})
+                await instance.getRefund(0, {from: secondAccount})
+                const postSaleAmount = await web3.eth.getBalance(secondAccount) 
+                
+                assert.equal(postSaleAmount.slice(-4), preSaleAmount.slice(-4), "buyer should be fully refunded when calling getRefund()") 
             })
         })
 
         describe("getBuyerNumberTickets()", async() =>{
             it("providing an event id to getBuyerNumberTickets() should tell an account how many tickets they have purchased", async() => {
+                const numberToPurchase = 3
 
+                await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, {from: deployAccount} )
+                await instance.buyTickets(0, numberToPurchase, {from: secondAccount, value: ticketPrice*numberToPurchase})
+                let result = await instance.getBuyerNumberTickets(0, {from: secondAccount})
+
+                assert.equal(result, numberToPurchase, "getBuyerNumberTickets() should return the number of tickets the msg.sender has purchased.")
             })
         })
 
         describe("endSale()", async() => {
-            it("only the owner should be able to end the sale", async() => {
+            it("only the owner should be able to end the sale and mark it as closed", async() => {
+                await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, {from: deployAccount} )
+                await catchRevert(instance.endSale(0, {from: firstAccount}))
+                const txResult = await instance.endSale(0, {from: deployAccount})
+                const eventData = await instance.readEvent(0)
 
+                assert.equal(eventData['4'], false, "The event isOpen variable should be marked false.")
             })
 
             it("endSale() should emit an event with information about how much ETH was sent to the contract owner", async() => {
+                const numberToPurchase = 3
 
+                await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, {from: deployAccount} )
+                await instance.buyTickets(0, numberToPurchase, {from: secondAccount, value: ticketPrice*numberToPurchase})
+                const txResult = await instance.endSale(0, {from: deployAccount})
+                
+                const amount = txResult.logs[0].args['1'].toString()
+
+                assert.equal(amount, ticketPrice*numberToPurchase, "the first emitted event should contain the tranferred amount as the second parameter")
             })
         })
     })
