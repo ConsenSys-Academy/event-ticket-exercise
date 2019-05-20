@@ -129,7 +129,7 @@ contract('EventTicket', function(accounts) {
                 await instance.endSale({from: firstAccount})
                 const postSaleAmount = await web3.eth.getBalance(firstAccount)
                 
-                assert.equal(postSaleAmount.slice(-4), (Number(preSaleAmount.slice(-4)) + numberOfTickets * ticketPrice).toString().slice(-4), "contract owner should receive contract balance when closing the event")
+                assert.equal(Number(postSaleAmount.slice(-4)), (Number(preSaleAmount.slice(-4)) + numberOfTickets * ticketPrice).toString().slice(-4), "contract owner should receive contract balance when closing the event")
             })
         })
     })
