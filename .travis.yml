@@ -7,6 +7,18 @@ before_script:
   - npm install -g truffle@5.0.0
 
 script:
+
+  # delete provided eventTickets testing file
+  - rm ./test/eventTickets.test.js
+  # get the official testing file and move into test dir
+  - git clone https://gist.github.com/e9ec0d8d6c53b56ca9673cfa139b5644.git   
+  - mv ./e9ec0d8d6c53b56ca9673cfa139b5644/eventTickets.test.js ./test/eventTickets.test.js
+  
+  # delete provided eventTicketsV2 testing file
+  - rm ./test/eventTicketV2.test.js
+  # get the official testing file and move into test dir
+  - git clone https://gist.github.com/421a92f5ad6d7136b6d5cb4fe5bcfd10.git
+  - mv ./421a92f5ad6d7136b6d5cb4fe5bcfd10/eventTicketV2.test.js ./test/eventTicketV2.test.js
   - ganache-cli &
   - sleep 5
   - truffle test
