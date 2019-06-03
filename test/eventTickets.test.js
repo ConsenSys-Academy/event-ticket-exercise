@@ -86,9 +86,8 @@ contract('EventTicket', function(accounts) {
                 const preSaleAmount = await web3.eth.getBalance(secondAccount)
                 await instance.buyTickets(1, {from: secondAccount, value: paymentAmount})
                 const postSaleAmount = await web3.eth.getBalance(secondAccount)
-        
-                
-                assert.equal((Number(postSaleAmount.slice(-4)) + ticketPrice).toString(), preSaleAmount.slice(-4), "overpayment should be refunded")
+                        
+                assert.equal((Number(postSaleAmount.slice(-4)) + ticketPrice).toString(), Number(preSaleAmount.slice(-4)).toString(), "overpayment should be refunded")
             })
         })  
         
@@ -102,7 +101,6 @@ contract('EventTicket', function(accounts) {
                 
                 assert.equal(postSaleAmount.slice(-4), preSaleAmount.slice(-4), "buyer should be fully refunded when calling getRefund()")        
             })
-
         })
 
         describe("endSale()", async() => {
