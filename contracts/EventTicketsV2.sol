@@ -31,7 +31,7 @@ contract EventTicketsV2 {
     event LogEventAdded(string desc, string url, uint ticketsAvailable, uint eventId);
     event LogBuyTickets(address buyer, uint eventId, uint numTickets);
     event LogGetRefund(address accountRefunded, uint eventId, uint numTickets);
-    event LogEndSale(address owner, uint balance);
+    event LogEndSale(address owner, uint balance, uint eventId);
 
     /*
         Create a modifier that throws an error if the msg.sender is not the owner.
