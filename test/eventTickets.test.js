@@ -91,7 +91,7 @@ contract('EventTicket', function(accounts) {
                 const buyTx = await web3.eth.getTransaction(buyReceipt.tx)
                 let buyTxCost = Number(buyTx.gasPrice) * buyReceipt.receipt.gasUsed
 
-                assert.equal((new BN(postSaleAmount).add(new BN(buyTxCost))).toString(), (new BN(preSaleAmount).sub(new BN(ticketPrice))).toString(), "overpayment should be refunded")
+                assert.equal(postSaleAmount, (new BN(preSaleAmount).sub(new BN(ticketPrice)).sub(new BN(buyTxCost))).toString(), "overpayment should be refunded")
             })
         })  
         
@@ -109,9 +109,8 @@ contract('EventTicket', function(accounts) {
                 const refundTx = await web3.eth.getTransaction(refundReceipt.tx)
                 let refundTxCost = Number(refundTx.gasPrice) * refundReceipt.receipt.gasUsed
 
-                assert.equal((new BN(postSaleAmount).add(new BN(buyTxCost)).add(new BN(refundTxCost))).toString(), preSaleAmount, "buyer should be fully refunded when calling getRefund()")        
+                assert.equal(postSaleAmount, (new BN(preSaleAmount).sub(new BN(buyTxCost)).sub(new BN(refundTxCost))).toString(), "buyer should be fully refunded when calling getRefund()")        
             })
-
         })
 
         describe("endSale()", async() => {
@@ -143,9 +142,10 @@ contract('EventTicket', function(accounts) {
                 const endSaleTx = await web3.eth.getTransaction(endSaleReceipt.tx)
                 let endSaleTxCost = Number(endSaleTx.gasPrice) * endSaleReceipt.receipt.gasUsed
 
-                assert.equal((new BN(postSaleAmount).add(new BN(endSaleTxCost))).toString(), (new BN(preSaleAmount).add(new BN(numberOfTickets).mul(new BN(ticketPrice)))).toString(), "contract owner should receive contract balance when closing the event")
+                assert.equal(postSaleAmount, (new BN(preSaleAmount).add(new BN(numberOfTickets).mul(new BN(ticketPrice))).sub(new BN(endSaleTxCost))).toString(), "contract owner should receive contract balance when closing the event")
             })
         })
     })
 })
+
 
