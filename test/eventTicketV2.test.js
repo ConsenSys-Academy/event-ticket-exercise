@@ -1,5 +1,6 @@
 var EventTicketsV2 = artifacts.require('EventTicketsV2')
 let catchRevert = require("./exceptionsHelpers.js").catchRevert
+const BN = web3.utils.BN
 
 contract('EventTicketV2', function(accounts) {
 
@@ -130,11 +131,17 @@ contract('EventTicketV2', function(accounts) {
             it("account requesting a refund should be credited the appropriate amount", async() => {
                 const preSaleAmount = await web3.eth.getBalance(secondAccount)
                 await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, {from: deployAccount} )
-                await instance.buyTickets(0, 1, {from: secondAccount, value: ticketPrice})
-                await instance.getRefund(0, {from: secondAccount})
+                const buyReceipt = await instance.buyTickets(0, 1, {from: secondAccount, value: ticketPrice})
+                const refundReceipt =await instance.getRefund(0, {from: secondAccount})
                 const postSaleAmount = await web3.eth.getBalance(secondAccount) 
                 
-                assert.equal(postSaleAmount.slice(-4), preSaleAmount.slice(-4), "buyer should be fully refunded when calling getRefund()") 
+                const buyTx = await web3.eth.getTransaction(buyReceipt.tx)
+                let buyTxCost = Number(buyTx.gasPrice) * buyReceipt.receipt.gasUsed
+
+                const refundTx = await web3.eth.getTransaction(refundReceipt.tx)
+                let refundTxCost = Number(refundTx.gasPrice) * refundReceipt.receipt.gasUsed
+
+                assert.equal(postSaleAmount, (new BN(preSaleAmount).sub(new BN(buyTxCost)).sub(new BN(refundTxCost))).toString(), "buyer should be fully refunded when calling getRefund()")             
             })
         })
 
@@ -173,5 +180,4 @@ contract('EventTicketV2', function(accounts) {
             })
         })
     })
-
 })
