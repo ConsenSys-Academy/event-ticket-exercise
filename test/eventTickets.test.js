@@ -2,6 +2,7 @@
 
 var EventTickets = artifacts.require('EventTickets')
 let catchRevert = require("./exceptionsHelpers.js").catchRevert
+const BN = web3.utils.BN
 
 contract('EventTicket', function(accounts) {
 
@@ -84,10 +85,13 @@ contract('EventTicket', function(accounts) {
                 const paymentAmount = ticketPrice * 5
 
                 const preSaleAmount = await web3.eth.getBalance(secondAccount)
-                await instance.buyTickets(1, {from: secondAccount, value: paymentAmount})
+                const buyReceipt = await instance.buyTickets(1, {from: secondAccount, value: paymentAmount})
                 const postSaleAmount = await web3.eth.getBalance(secondAccount)
-                        
-                assert.equal((Number(postSaleAmount.slice(-4)) + ticketPrice).toString(), Number(preSaleAmount.slice(-4)).toString(), "overpayment should be refunded")
+                
+                const buyTx = await web3.eth.getTransaction(buyReceipt.tx)
+                let buyTxCost = Number(buyTx.gasPrice) * buyReceipt.receipt.gasUsed
+
+                assert.equal((new BN(postSaleAmount).add(new BN(buyTxCost))).toString(), (new BN(preSaleAmount).sub(new BN(ticketPrice))).toString(), "overpayment should be refunded")
             })
         })  
         
@@ -95,12 +99,19 @@ contract('EventTicket', function(accounts) {
 
             it("buyers should be refunded the appropriate value amount when submitting a refund", async() => {
                 const preSaleAmount = await web3.eth.getBalance(secondAccount)
-                await instance.buyTickets(1, {from: secondAccount, value: ticketPrice})
-                await instance.getRefund({from: secondAccount})
+                const buyReceipt = await instance.buyTickets(1, {from: secondAccount, value: ticketPrice})
+                const refundReceipt = await instance.getRefund({from: secondAccount})
                 const postSaleAmount = await web3.eth.getBalance(secondAccount) 
                 
-                assert.equal(postSaleAmount.slice(-4), preSaleAmount.slice(-4), "buyer should be fully refunded when calling getRefund()")        
+                const buyTx = await web3.eth.getTransaction(buyReceipt.tx)
+                let buyTxCost = Number(buyTx.gasPrice) * buyReceipt.receipt.gasUsed
+
+                const refundTx = await web3.eth.getTransaction(refundReceipt.tx)
+                let refundTxCost = Number(refundTx.gasPrice) * refundReceipt.receipt.gasUsed
+
+                assert.equal((new BN(postSaleAmount).add(new BN(buyTxCost)).add(new BN(refundTxCost))).toString(), preSaleAmount, "buyer should be fully refunded when calling getRefund()")        
             })
+
         })
 
         describe("endSale()", async() => {
@@ -125,12 +136,16 @@ contract('EventTicket', function(accounts) {
                 const numberOfTickets = 1
                 
                 const preSaleAmount = await web3.eth.getBalance(firstAccount)
-                await instance.buyTickets(numberOfTickets, {from: secondAccount, value: numberOfTickets * ticketPrice})
-                await instance.endSale({from: firstAccount})
+                const buyReceipt = await instance.buyTickets(numberOfTickets, {from: secondAccount, value: numberOfTickets * ticketPrice})
+                const endSaleReceipt = await instance.endSale({from: firstAccount})
                 const postSaleAmount = await web3.eth.getBalance(firstAccount)
                 
-                assert.equal(Number(postSaleAmount.slice(-4)), (Number(preSaleAmount.slice(-4)) + numberOfTickets * ticketPrice).toString().slice(-4), "contract owner should receive contract balance when closing the event")
+                const endSaleTx = await web3.eth.getTransaction(endSaleReceipt.tx)
+                let endSaleTxCost = Number(endSaleTx.gasPrice) * endSaleReceipt.receipt.gasUsed
+
+                assert.equal((new BN(postSaleAmount).add(new BN(endSaleTxCost))).toString(), (new BN(preSaleAmount).add(new BN(numberOfTickets).mul(new BN(ticketPrice)))).toString(), "contract owner should receive contract balance when closing the event")
             })
         })
     })
 })
+
