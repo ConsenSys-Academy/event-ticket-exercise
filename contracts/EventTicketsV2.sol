@@ -14,7 +14,7 @@ contract EventTicketsV2 {
         Create a variable to keep track of the event ID numbers.
     */
     uint public idGenerator;
-    
+
     /*
         Define an Event struct, similar to the V1 of this contract.
         The struct has 6 fields: description, website (URL), totalTickets, sales, buyers, and isOpen.
@@ -56,10 +56,10 @@ contract EventTicketsV2 {
         The function returns information about the event this order:
             1. description
             2. URL
-            3. ticket available
+            3. tickets available
             4. sales
             5. isOpen
-    */     
+    */
 
     /*
         Define a function called buyTickets().
