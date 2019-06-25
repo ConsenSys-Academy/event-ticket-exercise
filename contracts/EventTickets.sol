@@ -47,7 +47,6 @@ contract EventTickets {
         The returned details should be called description, website, uint totalTickets, uint sales, bool isOpen in that order.
     */
     function readEvent()
-
         public
         returns(string memory description, string memory website, uint totalTickets, uint sales, bool isOpen)
     {
