@@ -6,11 +6,7 @@ pragma solidity ^0.5.0;
 
 contract EventTickets {
 
-    /*
-        Create a public state variable called owner.
-        Use the appropriate keyword to create an associated getter function.
-        Use the appropriate keyword to allow ether transfers.
-     */
+    address owner = msg.sender;
 
     uint   TICKET_PRICE = 100 wei;
 
