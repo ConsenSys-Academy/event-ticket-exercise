@@ -30,6 +30,8 @@ contract EventTickets {
         Create a modifier that throws an error if the msg.sender is not the owner.
     */
 
+    ipsum lorem doren!
+
     /*
         Define a constructor.
         The constructor takes 3 arguments, the description, the URL and the number of tickets for sale.
