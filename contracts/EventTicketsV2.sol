@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.6.0 <0.7.0;
 
     /*
         The EventTicketsV2 contract keeps track of the details and ticket sales of multiple events.
