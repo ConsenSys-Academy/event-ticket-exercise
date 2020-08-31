@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.6.0 <0.7.0;
 
     /*
         The EventTickets contract keeps track of the details and ticket sales of one event.
