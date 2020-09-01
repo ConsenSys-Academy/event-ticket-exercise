@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.6.0 <0.7.0;
 
     /*
         The EventTickets contract keeps track of the details and ticket sales of one event.
@@ -21,7 +21,7 @@ contract EventTickets {
         The "buyers" field should keep track of addresses and how many tickets each buyer purchases.
     */
 
-    Event myEvent;
+    event myEvent();
 
     /*
         Define 3 logging events.
